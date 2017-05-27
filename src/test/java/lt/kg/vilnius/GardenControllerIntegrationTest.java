@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -24,6 +26,7 @@ import static org.junit.Assert.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {Application.class})
 public class GardenControllerIntegrationTest {
     private static final String URI = "/api/garden";
+    private static final int NUMBER_OF_RECORDS_IN_GENERAL_CSV = 156;
 
     @Autowired
     private TestRestTemplate template;
@@ -67,5 +70,19 @@ public class GardenControllerIntegrationTest {
         assertThat(getOneResponse.getBody().length, is(1));
         assertThat(getZeroResponse.getStatusCode(), is(HttpStatus.OK));
         assertThat(getZeroResponse.getBody().length, is(0));
+    }
+
+    @Test
+    public void shouldSaveCSVRecordsToDB() throws IOException {
+        List<GardenEntity> gardenEntities = CsvUtils.parseGeneralGardensInfo();
+        gardenEntities.forEach(ent->{
+            ResponseEntity<GardenEntity> saveResponse = template.postForEntity(URI, ent, GardenEntity.class);
+            assertThat(saveResponse.getStatusCode(), is(HttpStatus.CREATED));
+            assertThat(saveResponse.getBody().getAddress(), is(ent.getAddress()));
+//            assertThat(saveResponse.getBody().getId(), is(ent.getId()));
+        });
+        ResponseEntity<GardenEntity[]> getResponse = template.getForEntity(URI, GardenEntity[].class);
+        assertThat(getResponse.getStatusCode(), is(HttpStatus.OK));
+        assertThat(getResponse.getBody().length, is(NUMBER_OF_RECORDS_IN_GENERAL_CSV));
     }
 }
