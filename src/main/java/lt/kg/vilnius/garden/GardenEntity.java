@@ -17,7 +17,7 @@ public class GardenEntity {
     private String label;
     @Column(nullable = false)
     private String address;
-    private Long phone;
+    private String phone;
     @Column(nullable = false)
     private Long schoolNo;
     private String www;
@@ -53,11 +53,11 @@ public class GardenEntity {
         this.address = address;
     }
 
-    public Long getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setPhone(Long phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
@@ -107,5 +107,21 @@ public class GardenEntity {
 
     public void setElderate(String elderate) {
         this.elderate = elderate;
+    }
+
+    @Override
+    public String toString() {
+        return "GardenEntity{" +
+                "id=" + id +
+                ", label='" + label + '\'' +
+                ", address='" + address + '\'' +
+                ", phone='" + phone + '\'' +
+                ", schoolNo=" + schoolNo +
+                ", www='" + www + '\'' +
+                ", email='" + email + '\'' +
+                ", schoolType='" + schoolType + '\'' +
+                ", buildDate=" + buildDate +
+                ", elderate='" + elderate + '\'' +
+                '}';
     }
 }
