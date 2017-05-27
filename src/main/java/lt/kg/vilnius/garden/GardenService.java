@@ -15,4 +15,12 @@ public class GardenService {
     public Iterable<GardenEntity> findAll() {
         return repository.findAll();
     }
+
+    public void deleteAll() {
+        repository.deleteAll();
+    }
+
+    public GardenEntity save(GardenEntity garden) {
+        return repository.save(garden);
+    }
 }
