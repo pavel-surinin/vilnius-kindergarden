@@ -1,4 +1,4 @@
-package lt.kg.vilnius;
+package lt.kg.vilnius.garden;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

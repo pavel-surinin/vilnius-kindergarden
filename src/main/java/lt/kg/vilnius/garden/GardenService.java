@@ -1,4 +1,4 @@
-package lt.kg.vilnius;
+package lt.kg.vilnius.garden;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
