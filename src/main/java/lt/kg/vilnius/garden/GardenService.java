@@ -23,4 +23,8 @@ public class GardenService {
     public GardenEntity save(GardenEntity garden) {
         return repository.save(garden);
     }
+
+    public GardenEntity findById(Long id) {
+        return repository.findById(id);
+    }
 }

@@ -1,19 +1,19 @@
 package lt.kg.vilnius.garden;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
  * Created by Pavel on 2017-05-27.
  */
 @Entity
+@Table(name = "GARDENS")
 public class GardenEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String label;
     @Column(nullable = false)
     private String address;
@@ -28,6 +28,18 @@ public class GardenEntity {
     private Date buildDate;
     @Column(nullable = false)
     private String elderate;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "garden", cascade = CascadeType.ALL)
+    private MissedDaysEntity missedDaysInfo;
+
+
+    public MissedDaysEntity getMissedDaysInfo() {
+        return missedDaysInfo;
+    }
+
+    public void setMissedDaysInfo(MissedDaysEntity missedDaysInfo) {
+        this.missedDaysInfo = missedDaysInfo;
+    }
 
     public long getId() {
         return id;

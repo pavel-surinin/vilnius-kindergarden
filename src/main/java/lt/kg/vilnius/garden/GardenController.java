@@ -18,6 +18,11 @@ public class GardenController {
         return service.findAll();
     }
 
+    @GetMapping("api/garden/{id}")
+    public GardenEntity findById(@PathVariable Long id){
+        return service.findById(id);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("api/garden")
     public GardenEntity save(@RequestBody GardenEntity garden){
@@ -25,7 +30,7 @@ public class GardenController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping
+    @DeleteMapping("api/garden")
     public void deleteAll(){
         service.deleteAll();
     }

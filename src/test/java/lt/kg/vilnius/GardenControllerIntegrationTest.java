@@ -2,6 +2,7 @@ package lt.kg.vilnius;
 
 import lt.kg.vilnius.garden.GardenEntity;
 import lt.kg.vilnius.garden.GardenService;
+import lt.kg.vilnius.garden.MissedDaysEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,10 +15,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by Pavel on 2017-05-27.
@@ -27,6 +31,8 @@ import static org.junit.Assert.*;
 public class GardenControllerIntegrationTest {
     private static final String URI = "/api/garden";
     private static final int NUMBER_OF_RECORDS_IN_GENERAL_CSV = 156;
+    private static final String LABEL_KG_KIDS_BEST = "KidsBest";
+    private static final long NUMBER_OF_KIDS_IN_KG = 100L;
 
     @Autowired
     private TestRestTemplate template;
@@ -35,7 +41,7 @@ public class GardenControllerIntegrationTest {
     private GardenService service;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         service.deleteAll();
     }
 
@@ -50,15 +56,9 @@ public class GardenControllerIntegrationTest {
     }
 
     @Test
-    public void shouldSaveAndDeleteSchool(){
+    public void shouldSaveAndDeleteSchool() {
         //setup
-        GardenEntity garden = new GardenEntity();
-        garden.setLabel("a");
-        garden.setAddress("a");
-        garden.setElderate("a");
-        garden.setBuildDate(new Date());
-        garden.setSchoolNo(1L);
-        garden.setSchoolType("a");
+        GardenEntity garden = generateGardenEntity(LABEL_KG_KIDS_BEST);
         //execute
         ResponseEntity<GardenEntity> saveResponse = template.postForEntity(URI, garden, GardenEntity.class);
         ResponseEntity<GardenEntity[]> getOneResponse = template.getForEntity(URI, GardenEntity[].class);
@@ -75,7 +75,7 @@ public class GardenControllerIntegrationTest {
     @Test
     public void shouldSaveCSVRecordsToDB() throws IOException {
         List<GardenEntity> gardenEntities = CsvUtils.parseGeneralGardensInfo();
-        gardenEntities.forEach(ent->{
+        gardenEntities.forEach(ent -> {
             ResponseEntity<GardenEntity> saveResponse = template.postForEntity(URI, ent, GardenEntity.class);
             assertThat(saveResponse.getStatusCode(), is(HttpStatus.CREATED));
             assertThat(saveResponse.getBody().getAddress(), is(ent.getAddress()));
@@ -84,5 +84,69 @@ public class GardenControllerIntegrationTest {
         ResponseEntity<GardenEntity[]> getResponse = template.getForEntity(URI, GardenEntity[].class);
         assertThat(getResponse.getStatusCode(), is(HttpStatus.OK));
         assertThat(getResponse.getBody().length, is(NUMBER_OF_RECORDS_IN_GENERAL_CSV));
+    }
+
+    @Test
+    public void shouldReturnRecordById() {
+        //setup
+        Map<String, Long> params = new HashMap<>();
+        params.put("id", 1L);
+        GardenEntity kidsBest = generateGardenEntity(LABEL_KG_KIDS_BEST);
+        GardenEntity kidsWorst = generateGardenEntity("KidsWorst");
+        //execution
+        template.postForEntity(URI, kidsBest, GardenEntity.class);
+        template.postForEntity(URI, kidsWorst, GardenEntity.class);
+        ResponseEntity<GardenEntity> responseGetById = template.getForEntity(URI + "/{id}", GardenEntity.class, params);
+        //assertion
+        assertThat(responseGetById.getStatusCode(), is(HttpStatus.OK));
+        assertThat(responseGetById.getBody().getId(), is(1L));
+        assertThat(responseGetById.getBody().getLabel(), is(LABEL_KG_KIDS_BEST));
+    }
+
+    public void shouldSaveMissedDaysToGardenEntity() {
+        //setup
+        GardenEntity gardenEntity = generateGardenEntity(LABEL_KG_KIDS_BEST);
+        addMissedDaysEntityToGarden(gardenEntity);
+        //execution
+        ResponseEntity<GardenEntity> createResponse = template.postForEntity(URI, gardenEntity, GardenEntity.class);
+        ResponseEntity<GardenEntity[]> allGardensResponse = template.getForEntity(URI, GardenEntity[].class);
+        GardenEntity gardenFromDB = allGardensResponse.getBody()[0];
+        //assertion
+        assertThat(createResponse.getStatusCode(), is(HttpStatus.CREATED));
+        assertThat(createResponse.getBody(), notNullValue());
+        assertThat(createResponse.getBody().getMissedDaysInfo().getAmmountOfKids(), is(NUMBER_OF_KIDS_IN_KG));
+        assertThat(allGardensResponse.getStatusCode(), is(HttpStatus.OK));
+        assertThat(gardenFromDB.getMissedDaysInfo().getAmmountOfKids(), is(NUMBER_OF_KIDS_IN_KG));
+        assertThat(gardenFromDB.getId(), is(gardenFromDB.getMissedDaysInfo().getId()));
+    }
+
+    /**
+     * Adds MissedDaysEntity to Garden Entity
+     * @param gardenEntity
+     */
+    private void addMissedDaysEntityToGarden(GardenEntity gardenEntity) {
+        MissedDaysEntity missedDaysEntity = new MissedDaysEntity();
+        missedDaysEntity.setAmmountOfKids(NUMBER_OF_KIDS_IN_KG);
+        missedDaysEntity.setNorApprovedMissedDays(10L);
+        missedDaysEntity.setOtherApprovedMissedDays(10L);
+        missedDaysEntity.setSickMissedDays(1L);
+        gardenEntity.setMissedDaysInfo(missedDaysEntity);
+    }
+
+    /**
+     * Generates garden entity
+     *
+     * @param label
+     * @return
+     */
+    private GardenEntity generateGardenEntity(String label) {
+        GardenEntity garden = new GardenEntity();
+        garden.setLabel(label);
+        garden.setAddress("a");
+        garden.setElderate("a");
+        garden.setBuildDate(new Date());
+        garden.setSchoolNo(1L);
+        garden.setSchoolType("a");
+        return garden;
     }
 }

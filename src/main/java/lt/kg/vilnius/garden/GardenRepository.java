@@ -10,4 +10,6 @@ import java.util.List;
 public interface GardenRepository extends CrudRepository<GardenEntity, Long> {
 
     List<GardenEntity> findByLabel(String lastName);
+
+    GardenEntity findById(Long id);
 }
