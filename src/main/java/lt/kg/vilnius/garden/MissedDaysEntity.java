@@ -13,12 +13,14 @@ public class MissedDaysEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @OneToOne
     private GardenEntity garden;
 
     @Column(nullable = false)
-    private Long ammountOfKids;
+    private String label;
+
+    @Column(nullable = false)
+    private Long amountOfKids;
 
     @Column(nullable = false)
     private Long sickMissedDays;
@@ -28,6 +30,14 @@ public class MissedDaysEntity {
 
     @Column(nullable = false)
     private Long norApprovedMissedDays;
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
     public Long getId() {
         return id;
@@ -45,12 +55,12 @@ public class MissedDaysEntity {
         this.garden = garden;
     }
 
-    public Long getAmmountOfKids() {
-        return ammountOfKids;
+    public Long getAmountOfKids() {
+        return amountOfKids;
     }
 
-    public void setAmmountOfKids(Long ammountOfKids) {
-        this.ammountOfKids = ammountOfKids;
+    public void setAmountOfKids(Long amountOfKids) {
+        this.amountOfKids = amountOfKids;
     }
 
     public Long getSickMissedDays() {

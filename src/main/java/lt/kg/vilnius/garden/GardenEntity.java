@@ -32,6 +32,16 @@ public class GardenEntity {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "garden", cascade = CascadeType.ALL)
     private MissedDaysEntity missedDaysInfo;
 
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "garden", cascade = CascadeType.ALL)
+    private BuildingStateEntity buildingState;
+
+    public BuildingStateEntity getBuildingState() {
+        return buildingState;
+    }
+
+    public void setBuildingState(BuildingStateEntity buildingState) {
+        this.buildingState = buildingState;
+    }
 
     public MissedDaysEntity getMissedDaysInfo() {
         return missedDaysInfo;
