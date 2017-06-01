@@ -12,6 +12,7 @@ public class GardenEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "GARDEN_ID")
     private long id;
     @Column(unique = true, nullable = false)
     private String label;
@@ -29,18 +30,20 @@ public class GardenEntity {
     @Column(nullable = false)
     private String elderate;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "garden", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "MISSED_DAYS_INFO_ID", unique = true)
     private MissedDaysEntity missedDaysInfo;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "garden", cascade = CascadeType.ALL)
-    private BuildingStateEntity buildingState;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "BUILDING_STATE_INFO_ID", unique = true)
+    private BuildingStateEntity buildingStateInfo;
 
-    public BuildingStateEntity getBuildingState() {
-        return buildingState;
+    public BuildingStateEntity getBuildingStateInfo() {
+        return buildingStateInfo;
     }
 
-    public void setBuildingState(BuildingStateEntity buildingState) {
-        this.buildingState = buildingState;
+    public void setBuildingStateInfo(BuildingStateEntity buildingStateInfo) {
+        this.buildingStateInfo = buildingStateInfo;
     }
 
     public MissedDaysEntity getMissedDaysInfo() {

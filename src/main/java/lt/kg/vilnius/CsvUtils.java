@@ -21,11 +21,16 @@ public class CsvUtils {
      * Parses csv with missed days info to {@Link} missed days entities
      *
      * @return
-     * @throws IOException
      */
-    public static List<MissedDaysEntity> parseMissedDaysInfo() throws IOException {
-        Reader in = new FileReader("./src/main/resources/csv/missed-days.csv");
-        Iterator<CSVRecord> records = CSVFormat.DEFAULT.parse(in).iterator();
+    public static List<MissedDaysEntity> parseMissedDaysInfo() {
+        Reader in;
+        Iterator<CSVRecord> records = null;
+        try {
+            in = new FileReader("./src/main/resources/csv/missed-days.csv");
+            records = CSVFormat.DEFAULT.parse(in).iterator();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         List<MissedDaysEntity> missedDaysEntities = new ArrayList<>();
         records.next();
         records.forEachRemaining(record -> {
@@ -44,12 +49,18 @@ public class CsvUtils {
     /**
      * Parses building state info from csv to entities
      * @return List of {@link BuildingStateEntity}
-     * @throws IOException
      */
-    public static List<BuildingStateEntity> parseBuildingState() throws IOException {
-        List<BuildingStateEntity> buildingStates = new ArrayList<>();
-        Reader in = new FileReader("./src/main/resources/csv/building-state.csv");
-        Iterator<CSVRecord> records = CSVFormat.DEFAULT.parse(in).iterator();
+    public static List<BuildingStateEntity> parseBuildingState(){
+        List<BuildingStateEntity> buildingStates;
+        Reader in;
+        buildingStates = new ArrayList<>();
+        Iterator<CSVRecord> records = null;
+        try {
+            in = new FileReader("./src/main/resources/csv/building-state.csv");
+            records = CSVFormat.DEFAULT.parse(in).iterator();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         List<MissedDaysEntity> missedDaysEntities = new ArrayList<>();
         records.next();
         records.forEachRemaining(record -> {
@@ -81,11 +92,16 @@ public class CsvUtils {
      * Parses csv with kindergartens info to {@Link GardenEntity}
      *
      * @return List of {@Link GardenEntity}
-     * @throws IOException
      */
-    public static List<GardenEntity> parseGeneralGardensInfo() throws IOException {
-        Reader in = new FileReader("./src/main/resources/csv/gardens.csv");
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.withHeader(HeadersGeneral.class).parse(in);
+    public static List<GardenEntity> parseGeneralGardensInfo() {
+        Reader in;
+        Iterable<CSVRecord> records = null;
+        try {
+            in = new FileReader("./src/main/resources/csv/gardens.csv");
+            records = CSVFormat.RFC4180.withHeader(HeadersGeneral.class).parse(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         List<GardenEntity> gardenEntities = new ArrayList<>();
         records.iterator().next();
         for (CSVRecord record : records) {

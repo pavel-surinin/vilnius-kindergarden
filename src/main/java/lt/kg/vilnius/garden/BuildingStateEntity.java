@@ -10,10 +10,8 @@ import javax.persistence.*;
 public class BuildingStateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "BUILDING_STATE_INFO_ID")
     private Long id;
-
-    @OneToOne
-    private GardenEntity garden;
 
     @Column(nullable = false)
     private String label;
@@ -30,14 +28,6 @@ public class BuildingStateEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public GardenEntity getGarden() {
-        return garden;
-    }
-
-    public void setGarden(GardenEntity garden) {
-        this.garden = garden;
     }
 
     public String getLabel() {

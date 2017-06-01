@@ -28,7 +28,6 @@ import static org.junit.Assert.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {Application.class})
 public class GardenControllerIntegrationTest {
     private static final String URI = "/api/garden";
-    private static final int NUMBER_OF_RECORDS_IN_GENERAL_CSV = 156;
     private static final String LABEL_KG_KIDS_BEST = "KidsBest";
     private static final long NUMBER_OF_KIDS_IN_KG = 100L;
 
@@ -88,17 +87,14 @@ public class GardenControllerIntegrationTest {
     @Test
     public void shouldReturnRecordById() {
         //setup
-        Map<String, Long> params = new HashMap<>();
-        params.put("id", 1L);
         GardenEntity kidsBest = generateGardenEntity(LABEL_KG_KIDS_BEST);
-        GardenEntity kidsWorst = generateGardenEntity("KidsWorst");
         //execution
-        template.postForEntity(URI, kidsBest, GardenEntity.class);
-        template.postForEntity(URI, kidsWorst, GardenEntity.class);
+        ResponseEntity<GardenEntity> saveResp = template.postForEntity(URI, kidsBest, GardenEntity.class);
+        Map<String, Long> params = new HashMap<>();
+        params.put("id", saveResp.getBody().getId());
         ResponseEntity<GardenEntity> responseGetById = template.getForEntity(URI + "/{id}", GardenEntity.class, params);
         //assertion
         assertThat(responseGetById.getStatusCode(), is(HttpStatus.OK));
-        assertThat(responseGetById.getBody().getId(), is(1L));
         assertThat(responseGetById.getBody().getLabel(), is(LABEL_KG_KIDS_BEST));
     }
 
@@ -125,9 +121,7 @@ public class GardenControllerIntegrationTest {
         List<GardenEntity> gardenEntities = CsvUtils.parseGeneralGardensInfo();
         List<MissedDaysEntity> missedDaysEntities = CsvUtils.parseMissedDaysInfo();
         //execution
-        gardenEntities.forEach(garden -> {
-            template.postForEntity(URI, garden, GardenEntity.class);
-        });
+        gardenEntities.forEach(garden -> template.postForEntity(URI, garden, GardenEntity.class));
         ResponseEntity<GardenEntity[]> getAllGardensBefore = template.getForEntity(URI, GardenEntity[].class);
         Arrays.stream(getAllGardensBefore.getBody())
                 .forEach(garden -> {
@@ -147,6 +141,7 @@ public class GardenControllerIntegrationTest {
                                 assertThat(gardenResp.getStatusCode(), is(HttpStatus.OK));
                                 assertThat(gardenResp.getBody().getLabel(), is(md.getLabel()));
                                 assertThat(gardenResp.getBody().getId(), is(saveFullGardenResp.getBody().getId()));
+                                assertThat(gardenResp.getBody().getMissedDaysInfo().getLabel(), is(garden.getLabel()));
                             });
                 });
     }
@@ -163,14 +158,18 @@ public class GardenControllerIntegrationTest {
         for (GardenEntity garden : allGardensResp.getBody()) {
             for (BuildingStateEntity state : states) {
                 if (state.getLabel().equals(garden.getLabel())){
-                    garden.setBuildingState(state);
+                    garden.setBuildingStateInfo(state);
                     ResponseEntity<GardenEntity> gardenSaveResponse = template.postForEntity(URI, garden, GardenEntity.class);
-                    BuildingStateEntity stateResp = gardenSaveResponse.getBody().getBuildingState();
+                    BuildingStateEntity stateResp = gardenSaveResponse.getBody().getBuildingStateInfo();
+                    HashMap<String, Long> params = new HashMap<>();
+                    params.put("id", garden.getId());
+                    ResponseEntity<GardenEntity> gardenByIdResp = template.getForEntity(URI + "/{id}", GardenEntity.class, params);
                     //assertion
                     assertThat(gardenSaveResponse.getStatusCode(), is(HttpStatus.CREATED));
                     assertThat(stateResp.getLabel(), is(state.getLabel()));
                     assertThat(stateResp.getOutsideState(), is(state.getOutsideState()));
                     assertThat(stateResp.getInsideState(), is(state.getInsideState()));
+                    assertThat(gardenByIdResp.getBody().getBuildingStateInfo().getLabel(), is(garden.getLabel()));
                 }
             }
         }

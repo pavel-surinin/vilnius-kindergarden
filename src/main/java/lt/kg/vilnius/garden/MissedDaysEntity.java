@@ -11,10 +11,8 @@ public class MissedDaysEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "MISSED_DAYS_INFO_ID", nullable = false)
     private Long id;
-
-    @OneToOne
-    private GardenEntity garden;
 
     @Column(nullable = false)
     private String label;
@@ -45,14 +43,6 @@ public class MissedDaysEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public GardenEntity getGarden() {
-        return garden;
-    }
-
-    public void setGarden(GardenEntity garden) {
-        this.garden = garden;
     }
 
     public Long getAmountOfKids() {

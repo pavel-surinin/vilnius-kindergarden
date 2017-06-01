@@ -13,11 +13,9 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-//    @Bean
-//    CommandLineRunner init(DataPreLoader loader) {
-//        return (args) -> {
-////            loader.load();
-//        };
-//    }
+    @Bean
+    CommandLineRunner init(DataPreLoader loader) {
+        return (args) -> loader.load();
+    }
 }
 
