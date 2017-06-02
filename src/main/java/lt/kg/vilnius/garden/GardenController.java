@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Created by Pavel on 2017-05-27.
  */
-@RestController()
+@RestController
 public class GardenController {
 
     @Autowired
     GardenService service;
 
-    @GetMapping
+    @GetMapping("api/garden")
     public Iterable<GardenEntity> findAll(){
         return service.findAll();
     }
