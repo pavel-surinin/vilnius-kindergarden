@@ -34,4 +34,10 @@ public class GardenController {
     public void deleteAll(){
         service.deleteAll();
     }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("api/garden/{id}")
+    public KidsGroup save(@RequestBody KidsGroup group, @PathVariable Long id){
+        return service.saveKidsGroup(group, id);
+    }
 }

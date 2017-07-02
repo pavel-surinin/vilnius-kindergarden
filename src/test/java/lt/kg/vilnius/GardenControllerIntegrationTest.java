@@ -1,9 +1,6 @@
 package lt.kg.vilnius;
 
-import lt.kg.vilnius.garden.BuildingStateEntity;
-import lt.kg.vilnius.garden.GardenEntity;
-import lt.kg.vilnius.garden.GardenService;
-import lt.kg.vilnius.garden.MissedDaysEntity;
+import lt.kg.vilnius.garden.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,8 +13,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -74,6 +73,7 @@ public class GardenControllerIntegrationTest {
         List<GardenEntity> gardenEntities = CsvUtils.parseGeneralGardensInfo();
         for (GardenEntity ent : gardenEntities) {
             ResponseEntity<GardenEntity> saveResponse = template.postForEntity(URI, ent, GardenEntity.class);
+            assertThat(saveResponse.getBody().getIdFromSource(), is(ent.getIdFromSource()));
             assertThat(saveResponse.getStatusCode(), is(HttpStatus.CREATED));
             assertThat(saveResponse.getBody().getAddress(), is(ent.getAddress()));
             assertThat(saveResponse.getBody().getLabel(), is(ent.getLabel()));
@@ -175,6 +175,26 @@ public class GardenControllerIntegrationTest {
         }
     }
 
+    @Test
+    public void shouldAttachGroupsToGarden(){
+        CsvUtils.parseGeneralGardensInfo().forEach(gardenEntity -> template.postForEntity(URI, gardenEntity, GardenEntity.class));
+        List<KidsGroup> kidsGroups = CsvUtils.parseGroups();
+        kidsGroups.stream()
+                .forEach(group -> {
+                    HashMap<String, Long> params = new HashMap<>();
+                    params.put("id", group.getGarden().getIdFromSource());
+                    ResponseEntity<KidsGroup> updateWithGroupResp = template.postForEntity(URI + "/{id}", group, KidsGroup.class, params);
+                    assertThat(updateWithGroupResp.getStatusCodeValue(), is(202));
+                });
+        ResponseEntity<GardenEntity[]> allResp = template.getForEntity(URI, GardenEntity[].class);
+        List<KidsGroup> groups = Arrays.stream(allResp.getBody())
+                .flatMap(gardenEntity -> gardenEntity.getGroups().stream())
+                .collect(Collectors.toList());
+        assertThat(allResp.getStatusCodeValue(), is(200));
+        assertThat(groups.size(), is(1637));
+
+    }
+
     /**
      * Adds MissedDaysEntity to Garden Entity
      *
@@ -203,6 +223,7 @@ public class GardenControllerIntegrationTest {
         garden.setBuildDate(new Date());
         garden.setSchoolNo(1L);
         garden.setSchoolType("a");
+        garden.setIdFromSource(1L);
         return garden;
     }
 

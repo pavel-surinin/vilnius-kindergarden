@@ -1,11 +1,18 @@
 package lt.kg.vilnius.garden;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Pavel on 2017-05-27.
  */
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 @Entity
 @Table(name = "GARDENS")
 public class GardenEntity {
@@ -30,13 +37,34 @@ public class GardenEntity {
     @Column(nullable = false)
     private String elderate;
 
+    @Column(nullable = false)
+    private Long idFromSource;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "MISSED_DAYS_INFO_ID", unique = true)
     private MissedDaysEntity missedDaysInfo;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "BUILDING_STATE_INFO_ID", unique = true)
     private BuildingStateEntity buildingStateInfo;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "garden")
+    private List<KidsGroup> groups;
+
+    public List<KidsGroup> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<KidsGroup> groups) {
+        this.groups = groups;
+    }
+
+    public Long getIdFromSource() {
+        return idFromSource;
+    }
+
+    public void setIdFromSource(Long idFromSource) {
+        this.idFromSource = idFromSource;
+    }
 
     public BuildingStateEntity getBuildingStateInfo() {
         return buildingStateInfo;

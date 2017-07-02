@@ -11,6 +11,9 @@ public class GardenService {
 
     @Autowired
     private GardenRepository repository;
+    @Autowired
+    private GroupRepository groupRepository;
+
 
     public Iterable<GardenEntity> findAll() {
         return repository.findAll();
@@ -26,5 +29,11 @@ public class GardenService {
 
     public GardenEntity findById(Long id) {
         return repository.findById(id);
+    }
+
+    public KidsGroup saveKidsGroup(KidsGroup group, Long id) {
+        GardenEntity garden = repository.findByIdFromSource(id);
+        group.setGarden(garden);
+        return groupRepository.save(group);
     }
 }

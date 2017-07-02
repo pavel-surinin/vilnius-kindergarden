@@ -32,5 +32,6 @@ public class DataPreLoader {
                 }
             });
         });
+        CsvUtils.parseGroups().forEach(kidsGroup -> service.saveKidsGroup(kidsGroup, kidsGroup.getGarden().getIdFromSource()));
     }
 }

@@ -1,17 +1,15 @@
 package lt.kg.vilnius;
 
-import lt.kg.vilnius.garden.BuildingStateEntity;
-import lt.kg.vilnius.garden.GardenEntity;
-import lt.kg.vilnius.garden.MissedDaysEntity;
+import lt.kg.vilnius.garden.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
 
 import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Pavel on 2017-05-27.
@@ -48,9 +46,10 @@ public class CsvUtils {
 
     /**
      * Parses building state info from csv to entities
+     *
      * @return List of {@link BuildingStateEntity}
      */
-    public static List<BuildingStateEntity> parseBuildingState(){
+    public static List<BuildingStateEntity> parseBuildingState() {
         List<BuildingStateEntity> buildingStates;
         Reader in;
         buildingStates = new ArrayList<>();
@@ -68,7 +67,7 @@ public class CsvUtils {
             entity.setLabel(record.get(0));
             entity.setInsideState((Float) getNumber(record.get(11)));
             entity.setOutsideState((Float) getNumber(record.get(10)));
-            if (entity.getInsideState() != null && entity.getOutsideState() != null){
+            if (entity.getInsideState() != null && entity.getOutsideState() != null) {
                 buildingStates.add(entity);
             }
         });
@@ -78,10 +77,73 @@ public class CsvUtils {
     private static Number getNumber(String s) {
         try {
             return Float.valueOf(s);
-        } catch (NumberFormatException e){
-
-            return null;
+        } catch (NumberFormatException e) {
+            Float value = Arrays.stream(s.split("m"))
+                    .filter(val -> {
+                        try {
+                            Float.valueOf(val);
+                            return true;
+                        } catch (Exception ex) {
+                            return false;
+                        }
+                    })
+                    .map(Float::valueOf)
+                    .findFirst()
+                    .orElse(null);
+            return value;
         }
+    }
+
+    /**
+     * Parses kids groups info from csv to entities
+     *
+     * @return List of {@link KidsGroup}
+     */
+    public static List<KidsGroup> parseGroups() {
+        Reader in;
+        Iterable<CSVRecord> records = null;
+        try {
+            in = new FileReader("./src/main/resources/csv/groups.csv");
+            records = CSVFormat.RFC4180.parse(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        List<KidsGroup> groups = new ArrayList<>();
+        records.iterator().next();
+        for (CSVRecord record : records) {
+            KidsGroup group = new KidsGroup();
+            List<Float> valuesFromTo = getValuesFromTo(record.get(3));
+            group.setAgeFrom(valuesFromTo.get(0));
+            if (valuesFromTo.size() == 2) {
+                group.setAgeTo(Float.valueOf(valuesFromTo.get(1)));
+            } else {
+                group.setAgeTo(Float.valueOf(99));
+            }
+            group.setLabel(record.get(1));
+            group.setType(getGroupType(record.get(1)));
+            group.setChildrenCount(Long.valueOf(record.get(2)));
+            GardenEntity gardenEntity = new GardenEntity();
+            gardenEntity.setIdFromSource(Long.valueOf(record.get(4)));
+            group.setGarden(gardenEntity);
+            groups.add(group);
+        }
+        return groups;
+    }
+
+    private static GroupTypes getGroupType(String name) {
+        if (name.toLowerCase().contains("alerg")) return GroupTypes.ALLERGY;
+        if (name.toLowerCase().contains("lopš")) return GroupTypes.SMALL;
+        if (name.toLowerCase().contains("lops")) return GroupTypes.SMALL;
+        if (name.toLowerCase().contains("log")) return GroupTypes.SPEECH;
+        if (name.toLowerCase().contains("spec")) return GroupTypes.SPECIAL;
+        return GroupTypes.NORMAL;
+    }
+
+    private static List<Float> getValuesFromTo(String originalValues) {
+        return Arrays.stream(originalValues.split(" "))
+                .map(val -> (Float) getNumber(val.replace(",", ".")))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public enum HeadersGeneral {
@@ -106,6 +168,7 @@ public class CsvUtils {
         records.iterator().next();
         for (CSVRecord record : records) {
             GardenEntity garden = new GardenEntity();
+            garden.setIdFromSource(Long.valueOf(record.get(0)));
             garden.setLabel(record.get(HeadersGeneral.LABEL));
             garden.setAddress(record.get(HeadersGeneral.ADDRESS));
             garden.setPhone(record.get(HeadersGeneral.PHONE));
