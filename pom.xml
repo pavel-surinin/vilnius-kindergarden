@@ -7,7 +7,7 @@
     <groupId>lt.kg.vilnius</groupId>
     <artifactId>vilnius-kg</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -122,6 +122,11 @@
             <version>4.0.0.M1</version>
             <scope>test</scope>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.springframework.data</groupId>-->
+            <!--<artifactId>spring-data-rest-webmvc</artifactId>-->
+            <!--<version>2.6.4.RELEASE</version>-->
+        <!--</dependency>-->
     </dependencies>
     <repositories>
         <repository>
