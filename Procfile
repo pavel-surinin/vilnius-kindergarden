@@ -1,1 +1,1 @@
-java -jar target\vilnius-kg-0.1-SNAPSHOT.jar
+web: java -jar target/vilnius-kg-0.1-SNAPSHOT.jar
